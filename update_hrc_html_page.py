@@ -6,7 +6,7 @@
 #                                                                                           #
 #               author: t. isobe (tisobe@cfa.harvard.edu)                                   #
 #                                                                                           #
-#               last update: Apr 14, 2016                                                   #
+#               last update: Apr 22, 2016                                                   #
 #                                                                                           #
 #############################################################################################
 
@@ -650,20 +650,24 @@ def create_slide_map_pages():
 #
                 if name == 'Hrc_s_125':
                     line = line + '<th style="width:70px">\n'
+                    line = line + '\t<a href="./Yearly/' + lname + '_year' + str(kyear) + '.html"'
+                    line = line + ' target="blank">\n'
                     for sec in range(1,4):
-                        line = line + '<img src="./Maps/' + name + '/Simage/' + lname+ '_' 
+                        line = line + '\t\t<img src="./Maps/' + name + '/Simage/' + lname+ '_' 
                         line = line +  str(kyear) + '_thumb' + str(sec) + '.png">\n'
-                    line = line + '</th>\n'
+                    line = line + '\n\t</a>\n</th>\n'
 #
 #--- hrc s 125 hi and hrc i 115 cases
 #
                 else:
                     if name == 'Hrc_s_125_hi':
-                        line = line + '<th style="width:70px">'
+                        line = line + '<th style="width:70px">\n'
                     else:
-                        line = line + '<th>'
-                    line = line + '<img src="./Maps/' + name + '/Simage/' + lname+ '_' 
-                    line = line +  str(kyear) + '_thumb.png"</th>\n'
+                        line = line + '<th>\n'
+                    line = line + '\t<a href="./Yearly/' + lname + '_year' + str(kyear) + '.html"'
+                    line = line + ' target="blank">\n'
+                    line = line + '\t\t<img src="./Maps/' + name + '/Simage/' + lname+ '_' 
+                    line = line +  str(kyear) + '_thumb.png">\n\t</a>\n </th>\n'
 #
 #--- if there is no data for the year, say so
 #
