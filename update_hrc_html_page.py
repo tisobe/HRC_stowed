@@ -667,7 +667,7 @@ def create_slide_map_pages():
                     line = line + '\t<a href="./Yearly/' + lname + '_year' + str(kyear) + '.html"'
                     line = line + ' target="blank">\n'
                     line = line + '\t\t<img src="./Maps/' + name + '/Simage/' + lname+ '_' 
-                    line = line +  str(kyear) + '_thumb.png">\n\t</a>\n </th>\n'
+                    line = line +  str(kyear) + '_thumb.png">\n\t</a>\n</th>\n'
 #
 #--- if there is no data for the year, say so
 #
