@@ -6,7 +6,7 @@
 #                                                                                           #
 #               author: t. isobe (tisobe@cfa.harvard.edu)                                   #
 #                                                                                           #
-#               last update: Apr 22, 2016                                                   #
+#               last update: Jul 17, 2016                                                   #
 #                                                                                           #
 #############################################################################################
 
@@ -91,6 +91,11 @@ def create_html_pages(year):
         create_page(eyear, tyear)
     
     else:
+#
+#--- if the current year is the same as the given year, it is mid year update; so tyear = year+1
+#
+        if tyear == year:
+            tyear += 1
         create_page(year, tyear)
 #
 #--- crate main pages: hrc_i_115_main.html, hrc_s_125_hi_main.html, and hrc_s125_main.html

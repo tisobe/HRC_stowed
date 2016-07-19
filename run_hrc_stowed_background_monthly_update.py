@@ -7,7 +7,7 @@
 #                                                                                           #
 #               author: t. isobe (tisobe@cfa.harvard.edu)                                   #
 #                                                                                           #
-#               last update: Apr 14, 2016                                                   #
+#               last update: Jul 19, 2016                                                   #
 #                                                                                           #
 #############################################################################################
 
@@ -50,6 +50,7 @@ import create_hrc_image_files     as chif       #---- contains functions to crea
 import hrc_plotting_maps          as hpm        #---- contains functions to create png maps 
 import update_hrc_html_page       as uhhp       #---- contains functions to update html pages
 import hrc_stowed_background      as hsb        #---- contains functions to extract and create hrc evt files
+import hrc_plotting_routines      as hpr        #---- contains functions to plot trends
 #
 #--- temp writing file name
 #
@@ -89,7 +90,7 @@ def run_hrc_stowed_background_monthly_update(lyear='', lmonth=''):
     if lyear == '':
         ctime  = time.gmtime()      #--- today's date information
         lyear  = ctime.tm_year
-        lmonth = ctime.tm_month -1
+        lmonth = ctime.tm_mon -1
 
         if lmonth < 1:
             lyear -= 1
@@ -113,7 +114,8 @@ def run_hrc_stowed_background_monthly_update(lyear='', lmonth=''):
                 hpm.plot_hrc_map(lyear)
                 hpm.plot_hrc_map('total')       #---- creating cumulative maps
                 hpm.plot_hrc_map('total', 1)    #---- creating cumulative histogram for the front page
-                uhhp.create_html_pages(lyear)
+                hpr.plot_hrc_trend_data()       #---- creating trending plots
+                uhhp.create_html_pages(lyear)   #---- updating all html pages
                 create_cumulative_image()
 
             if test_data_creation(lyear, lmonth):
