@@ -7,7 +7,7 @@
 #                                                                                           #
 #               author: t. isobe (tisobe@cfa.harvard.edu)                                   #
 #                                                                                           #
-#               last update: Jul 19, 2016                                                   #
+#               last update: Jan 18, 2017                                                   #
 #                                                                                           #
 #############################################################################################
 
@@ -109,7 +109,11 @@ def run_hrc_stowed_background_monthly_update(lyear='', lmonth=''):
 #--- if the processed month is june or december, update maps and html pages
 #
             if (lmonth == 12) or (lmonth == 6):
-            #if lmonth == 19:
+#
+#--- update total event number tables
+#
+                get_yearly_evt_count()
+
                 chif.yearly_cummulative_image(lyear)
                 hpm.plot_hrc_map(lyear)
                 hpm.plot_hrc_map('total')       #---- creating cumulative maps
@@ -151,6 +155,53 @@ def run_hrc_stowed_background_monthly_update(lyear='', lmonth=''):
 
     if smail > 0:
         send_email(message, header)
+
+
+#---------------------------------------------------------------------
+#-- get_yearly_evt_count: counts the numbers of events in the yearly evt1 files
+#---------------------------------------------------------------------
+
+def get_yearly_evt_count():
+    """
+    counts the numbers of events in the yearly evt1 files
+    input: none, but read from yearly evt1.fits files
+    output: <data_dir>/<inst>/<inst>_yearly_evt_counts
+    """
+#
+#--- find today's date
+#
+    out   = time.localtime()
+    lyear = out.tm_year
+    mon   = out.tm_mon
+#
+#--- if the date is the first half of the year, compute the last year
+#
+    if mon > 6:
+        lyear += 1
+#
+#--- check each instrument
+#
+    for inst in inst_list:
+        #print inst
+        ofile = data_dir + inst + '/' + inst.lower() + '_yearly_evt_counts'
+        fo    = open(ofile, 'w')
+
+        for year in range(2000, lyear):
+            #print '\t' + str(year)
+            infile = data_dir + inst + '/'+ inst.lower() + '_' + str(year) + '_evt1.fits.gz'
+#
+#--- read the numbers of events
+#
+            try:
+                out  = hscf.fitsTableStat(infile, 'time')
+                cnt  = out[-1]
+            except:
+                cnt  = 0
+
+
+            line = str(year) + '\t' + str(cnt) + '\n'
+            fo.write(line)
+
 
 #-----------------------------------------------------------------------------------------------
 #-- send_email: sending out mail                                                              --
@@ -416,4 +467,4 @@ if __name__ == "__main__":
 #
     else:
         run_hrc_stowed_background_monthly_update()
-
+        fo.close()

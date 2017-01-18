@@ -6,7 +6,7 @@
 #                                                                                           #
 #               author: t. isobe (tisobe@cfa.harvard.edu)                                   #
 #                                                                                           #
-#               last update: Jul 17, 2016                                                   #
+#               last update: Jan 17, 2017                                                   #
 #                                                                                           #
 #############################################################################################
 
@@ -290,6 +290,10 @@ def print_main_page(tyear):
 #
         [y_list, e_list] = read_dead_time_list(dname, tyear)
 #
+#--- read total events counts
+#
+        ecnt_list        = read_tot_evnt_cnt(y_list, tname)
+#
 #--- create atable row entry for each year
 #
         ycnt = tyear - 2000
@@ -317,7 +321,7 @@ def print_main_page(tyear):
                 line  = line + '<tr><th colspan=6><img src="' + scale + '"></th></tr>'
 
             line = line + '<tr><th><a href="' + html + '">' + str(y_list[k]) + '</a></th>\n'
-            line = line + '<th>' + str(e_list[k]) + '</th>\n'
+            line = line + '<th>' + str(e_list[k]) +  '<br />' + str(ecnt_list[k])  + '</th>\n'
 #
 #--- evt1 with peak region enhanced / evt1 with the uniform scale, / evt2 with peak region / evt2 with the uniform scale
 #
@@ -335,6 +339,13 @@ def print_main_page(tyear):
 
         esum = locale.format("%d", esum, grouping=True)
 
+        ecnt = 0
+        for ent in ecnt_list:
+            ent = ent.replace(',', '')
+            ecnt += int(float(ent))
+
+        ecnt = locale.format("%d", ecnt, grouping=True)
+
         ypart = 'total'
         html  = './Yearly/'        + hpart + 'total.html'
         hdir  = tname.replace('_year_template', '')
@@ -346,7 +357,7 @@ def print_main_page(tyear):
         line  = line + '<tr><th colspan=6><img src="' + scale + '"></th></tr>'
 
         line = line + '<tr><th><a href="' + html + '">Total</a></th>\n'
-        line = line + '<th>' + str(esum) + '</th>\n'
+        line = line + '<th>' + str(esum)+ '<br />' + str(ecnt) + '</th>\n'
 
         line = line + make_table_line(html, hdir, hpart, ypart, slist, '',      '_b')
         line = line + make_table_line(html, hdir, hpart, ypart, slist, '',      '')
@@ -405,6 +416,7 @@ def update_image_correction_page(year):
     output: <html_dir>/hrci_image_correction.html
     """
     [y_list, e_list] = read_dead_time_list('hrc_i_115_dead_time', year)
+    evt_cnt          = read_tot_evnt_cnt(y_list, 'hrc_i_115_year_template')
 
     line = ''
     for k in range(0, len(y_list)):
@@ -413,6 +425,7 @@ def update_image_correction_page(year):
         line = line + '<td style="text-align:center"><a href="./Data/Hrc_i_115/hrc_i_115_' + str(y_list[k]) 
         line = line + '_evt1.fits.gz">hrc_i_115_' + str(y_list[k]) + ' evt1 file </a></td>\n'
         line = line + '<td style="text-align:center">' + str(e_list[k]) + '</td>\n'
+        line = line + '<td style="text-align:center">' + str(evt_cnt[k]) + '</td>\n'
         line = line + '</tr>\n\n'
 
     file = house_keeping + 'Templates/hrci_image_correction_template'
@@ -477,6 +490,36 @@ def read_dead_time_list(dead_list_name, tyear):
         e_list.append(dval)
 
     return [y_list, e_list]
+
+#-----------------------------------------------------------------------------------------------
+#-- read_tot_evnt_cnt: create a list of the total numbers of events for the year              --
+#-----------------------------------------------------------------------------------------------
+
+def read_tot_evnt_cnt(y_list, tname):
+    """
+    create a list of the total numbers of events for the year
+    (start from 2000)
+    input:  y_list  ---- a list of year which we want to extract data
+            tname   ---- instrument template name
+    output: ecnt    ---- a list of total event counts starting from year 2000
+    """
+
+    atemp  = re.split('_year', tname)
+    infile = data_dir + atemp[0].capitalize() + '/' + atemp[0] + '_yearly_evt_counts'
+    f      = open(infile, 'r')
+    data   = [line.strip() for line in f.readlines()]
+    f.close()
+
+    ecnt   = []
+    for ent in data:
+        atemp = re.split('\s+', ent)
+        year  = int(float(atemp[0]))
+        if year in y_list:
+            val   = int(float(atemp[1]))
+            dval  = locale.format("%d", val, grouping=True)
+            ecnt.append(dval)
+
+    return ecnt
 
 #-----------------------------------------------------------------------------------------------
 #-- update_stat_data_table: create html pages to display stat results                        ---

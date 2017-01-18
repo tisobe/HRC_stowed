@@ -6,7 +6,7 @@
 #                                                                                           #
 #               author: t. isobe (tisobe@cfa.harvard.edu)                                   #
 #                                                                                           #
-#               last update: Apr 18, 2016                                                   #
+#               last update: Jan 17, 2017                                                   #
 #                                                                                           #
 #############################################################################################
 
@@ -83,6 +83,140 @@ basetime = datetime.strptime('01/01/98,00:00:00', BTFMT)
 #
 Epoch    = time.localtime(0)
 Ebase_t  = time.mktime((1998, 1, 1, 0, 0, 0, 5, 1, 0))
+
+#-----------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------
+
+def run_test():
+
+    cmd = 'ls *fits.gz > ./ztemp2'
+    os.system(cmd)
+
+    f     = open('./ztemp2', 'r')
+    flist = [line.strip() for line in f.readlines()]
+    f.close()
+
+    cond_list = [['QUALITY', '==', '0000000000000000000'], ['MNF', '==', 0]]
+
+    outfits = './test.fits'
+
+    fits_merge(flist, outfits, cond_list)
+
+#-----------------------------------------------------------------------------------------------
+#-- fits_merge: combine fits files in a list and extract data matched for the condition       --
+#-----------------------------------------------------------------------------------------------
+
+def fits_merge(flist, outfits,  codition_lists = ''):
+    """
+    combine fits files in a list and extract data matched for the condition
+    this is a substitue for ciao dmmerge
+    input:  flist           --- a list of fits file names
+            outfits         --- output fits file name
+            condition_lists --- a list of lists of condition in the form of:
+                                [<col name>, <condition>, <value>] 
+                                    e.g., ['QUALITY', '==', '0000000000000000000']
+    output: outfits         --- combined fits file
+    """
+#
+#--- find the first fits file; must be unzipped
+#
+    mc  = re.search('gz', flist[0])
+    mcf.rm_file('temp.fits')
+    mcf.rm_file('temp.fits.gz')
+    if mc is not None:
+        cmd = 'cp ' + flist[0] + ' temp.fits.gz'
+        os.system(cmd)
+        cmd = 'gzip -d temp.fits.gz'
+        os.system(cmd)
+    else:
+        cmd = 'cp ' + flist[0] + ' temp.fits'
+        os.system(cmd)
+#
+#--- combine all fits files
+#
+    for k in range(1, len(flist)):    
+            mcf.rm_file('zout.fits')
+            appendFitsTable('temp.fits', flist[k], 'zout.fits')
+            cmd = 'mv zout.fits temp.fits'
+            os.system(cmd)
+#
+#--- if there is no selection condition, just move the temp file to output fits file
+#
+    if codition_lists == '':
+        cmd = 'mv temp.fits ' + outfits
+        os.system(cmd)
+#
+#--- if the selection conditions are given, select data accordingly
+#
+    else:
+        [cols, dout] = read_fits_file('temp.fits')
+        for condition in codition_lists:
+            col = condition[0]
+            cnd = condition[1]
+            val = condition[2]
+
+            dout = select_data_with_condition(dout, col, cnd, val)
+
+        hdu    = pyfits.open('temp.fits')
+        hdu[1].data = dout
+
+        hdu.writeto(outfits)
+
+    mcf.rm_file('temp.fits')
+
+#-------------------------------------------------------------------------------------------------------
+#-- appendFitsTable: Appending one table fits file to the another                                    ---
+#-------------------------------------------------------------------------------------------------------
+
+def appendFitsTable(file1, file2, outname, extension = 1):
+
+    """
+    Appending one table fits file to the another
+    the output table will inherit column attributes of the first fits table
+    Input:  file1   --- fits table
+            file2   --- fits table (will be appended to file1)
+            outname --- the name of the new fits file
+    Output: a new fits file "outname"
+    """
+
+    t1 = pyfits.open(file1)
+    t2 = pyfits.open(file2)
+#
+#-- find numbers of rows (two different ways as examples here)
+#
+    nrow1 = t1[extension].data.shape[0]
+    nrow2 = t2[extension].header['naxis2']
+#
+#--- total numbers of rows to be created
+#
+    nrows = nrow1 + nrow2
+    hdu   = pyfits.BinTableHDU.from_columns(t1[extension].columns, nrows=nrows)
+#
+#--- append by the field names
+#
+    for name in t1[extension].columns.names:
+        hdu.data.field(name)[nrow1:] = t2[extension].data.field(name)
+#
+#--- write new fits data file
+#
+    hdu.writeto(outname)
+
+    t1.close()
+    t2.close()
+#
+#--- attach the header
+#
+    header = t1[extension].header
+    data, temp = pyfits.getdata(outname, extension, header=True)
+    mcf.rm_file('ztemp.fits')
+    pyfits.writeto('ztemp.fits', data, header)
+
+    update_header_time('ztemp.fits', 'ztemp2.fits')
+    mcf.rm_file('ztemp.fits')
+
+    cmd = 'mv ztemp2.fits ' + outname
+    os.system(cmd)
 
 #-----------------------------------------------------------------------------------------------
 #-- read_fits_file: read table fits data and return col names and data                       ---
@@ -272,7 +406,7 @@ def set_format_for_col(name, cdata):
 #-- combine_and_select_data: for a given list of fits files, combine them and extract columns needed 
 #-----------------------------------------------------------------------------------------------
 
-def combine_and_select_data(fits_list, selected_cols):
+def combine_and_select_data(fits_list, selected_cols=''):
     """
     for a given list of fits files, combine them and extract columns needed
     input:  fits_list       --- a list of fits files
@@ -290,15 +424,19 @@ def combine_and_select_data(fits_list, selected_cols):
             chk = 1
         else:
             ctbdata = combine_tabledata(ctbdata, tbdata, cols)
+
+    if selected_cols == '':
+        return ctbdata
 #
 #--- extract only columns we need
 #
-    try:
-        dout = extract_col_data(ctbdata, selected_cols)
-    except:
-        dout = NULL
-    
-    return dout
+    else:
+        try:
+            dout = extract_col_data(ctbdata, selected_cols)
+        except:
+            dout = NULL
+     
+        return dout
 
 #-----------------------------------------------------------------------------------------------
 #-- combine_tabledata: combine two pyfits table data into one                                 --
@@ -670,9 +808,70 @@ def select_data_with_logical_mask(tbdata, col, mask):
 
     dcol    = pyfits.ColDefs(out)
     dbhdu   = pyfits.BinTableHDU.from_columns(dcol)
-    ntbdata = dbhdu.data
+    dout    = dbhdu.data
 
-    return ntbdata
+    return dout
+
+#-------------------------------------------------------------------------------------------------------
+#-- fitsTableStat: find min, max, avg, std, and mediam of the column                                  --
+#-------------------------------------------------------------------------------------------------------
+
+def fitsTableStat(file, column, extension=1):
+
+    """
+    find min, max, avg, std, and mediam of the column. 
+    Input   file--- table fits file name
+    column  --- name of the column(s). if there are more than one, must be 
+    in the form of list or tuple
+    extension-- data extension #. default = 1
+    Output  a list or a list of lists of [min, max, avg, std, med, sample size]
+    """
+    
+    t = pyfits.open(file)
+    tdata = t[extension].data
+    t.close()
+    
+    if isinstance(column, list) or isinstance(column, tuple):
+    
+        results = []
+        for ent in column:
+            data = tdata.field(ent)
+            line = []
+            dmin = min(data)
+            line.append(dmin)
+            dmax = max(data)
+            line.append(dmax)
+            avg  = numpy.mean(data)
+            line.append(avg)
+            std  = numpy.std(data)
+            line.append(std)
+            med  = numpy.median(data)
+            line.append(med)
+            line.append(len(data))
+     
+            if len(column) > 1:
+                results.append(line)
+            else:
+                results = line
+                break
+    
+    else:
+        data = tdata.field(column)
+        results = []
+        dmin = min(data)
+        results.append(dmin)
+        dmax = max(data)
+        results.append(dmax)
+        avg  = numpy.mean(data)
+        results.append(avg)
+        std  = numpy.std(data)
+        results.append(std)
+        med  = numpy.median(data)
+        results.append(med)
+        results.append(len(data))
+    
+    return results
+
 
 #-----------------------------------------------------------------------------------------------
 #-- run_arc5gl: extract data from archive using arc5gl                                        --
@@ -1576,4 +1775,5 @@ class TestFunctions(unittest.TestCase):
 #
 if __name__ == "__main__":
 
-    unittest.main()
+    run_test()
+

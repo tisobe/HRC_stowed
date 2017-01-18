@@ -31,7 +31,12 @@ event file links and their dead time corrected total yearly exposure time.
 </p>
 
 <table border="1" cellpadding="3" cellspacing="3" style='margin-left: auto;margin-right: auto;'>
-<tbody><tr><th>Year</th><th style="text-align:center">HRC I Evt1 File</th><th>Corrected Exposure Time (sec)</th></tr>
+<tbody><tr>
+            <th>Year</th>
+            <th style="text-align:center">HRC I Evt1 File</th>
+            <th>Corrected Exposure Time (sec)</th>
+            <th>Total Event Numbers</th>
+        </tr>
 
 #TABLE#
 
@@ -40,7 +45,7 @@ event file links and their dead time corrected total yearly exposure time.
 
 
 <p>
-The HRC-I background event files are also available for download as part of <a href="http://cxc.harvard.edu/ciao/download/caldb.html">CALDB 4.7.0</a>, released on 15 Dec. 2015.
+The HRC-I background event files are also available for download as part of <a href="http://cxc.harvard.edu/ciao/download/caldb.html">CALDB 4.7.3</a>, released on 31 May 2016.
 (see also <a href='http://cxc.harvard.edu/ciao/threads/hrci_bg_events/'>CIAO The HRC-I Background Event Files</a> Page.)
 </p>
 

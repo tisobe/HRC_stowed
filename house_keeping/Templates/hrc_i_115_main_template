@@ -64,7 +64,7 @@ If you click on the year or one of the maps, it will take to the larger map of t
 <table border=1 style='margin-left:auto;margin-right:auto'>
 <tr>
     <th>Year</th>
-    <th> Time (sec)</th>
+    <th> Time (sec) <br /> Total Event Numbers</th>
     <th>Evt1<br /> (Peak Area) </th>
     <th>Evt1<br /> (Same Scale)</th>
     <th>Lev2<br /> (Peak Area) </th>
