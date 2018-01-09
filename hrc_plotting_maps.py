@@ -6,7 +6,7 @@
 #                                                                                           #
 #               author: t. isobe (tisobe@cfa.harvard.edu)                                   #
 #                                                                                           #
-#               last update: Apr 14, 2016                                                   #
+#               last update: Jan 08, 2018                                                   #
 #                                                                                           #
 #############################################################################################
 
@@ -84,12 +84,15 @@ def plot_hrc_map(year, chk=0):
 #
     hdir = 'Hrc_i_115'
     xmin    = 1.0e-7
-    xmax    = 8.0e-7
+    #xmax    = 8.0e-7
+    xmax    = 9.0e-7
     ymin    = 0
     ymax    = 300
     if chk == 1:
-        xmin    = 2.5e-7
-        xmax    = 4.5e-7
+        #xmin    = 2.5e-7
+        #xmax    = 4.5e-7
+        xmin    = 3.0e-7
+        xmax    = 7.0e-7
         ymax    = 200
     binsize = 0.2e-8
     hrc     = 'i'
@@ -133,11 +136,16 @@ def plot_hrc_map(year, chk=0):
     xp      = [2.0e-6, 4.0e-6, 6.0e-6]
     xl      = ['2.0', '4.0', '6.0']
     if chk == 1:
-        xmin    = 2.0e-6
-        xmax    = 4.0e-6
+        #xmin    = 2.0e-6
+        #xmax    = 4.0e-6
+        #ymax    =270
+        #xp      = [2.0e-6, 3.0e-6, 4.0e-6]
+        #xl      = ['2.0', '3.0', '4.0']
+        xmin    = 3.0e-6
+        xmax    = 5.0e-6
         ymax    =270
-        xp      = [2.0e-6, 3.0e-6, 4.0e-6]
-        xl      = ['2.0', '3.0', '4.0']
+        xp      = [3.0e-6, 4.0e-6, 5.0e-6]
+        xl      = ['3.0', '4.0', '5.0']
 #
 #--- hrc_s_125 has three sections
 #
